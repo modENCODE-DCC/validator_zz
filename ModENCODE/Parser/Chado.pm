@@ -302,6 +302,7 @@ my %port             :ATTR( :name<port>,             :default<undef> );
 my %dbname           :ATTR( :name<dbname>,           :default<undef> );
 my %username         :ATTR( :name<username>,         :default<''> );
 my %password         :ATTR( :name<password>,         :default<''> );
+my %search_path      :ATTR( :name<search_path>,      :default<''> );
 my %cache            :ATTR(                          :default<{}> );
 my %cache_array      :ATTR(                          :default<{}> );
 #my %protocol_slots   :ATTR(                          :default<[]> );
@@ -1317,6 +1318,10 @@ sub get_dbh : PRIVATE {
     }
   }
 
+  if (defined($self->get_search_path())) {
+      my $search_path_cmd = "SET search_path TO " . $self->get_search_path . ",public";
+      $dbh{ident $self}->do("$search_path_cmd");
+  }
   return $dbh{ident $self};
 }
 
