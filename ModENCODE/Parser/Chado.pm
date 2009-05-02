@@ -302,7 +302,6 @@ my %port             :ATTR( :name<port>,             :default<undef> );
 my %dbname           :ATTR( :name<dbname>,           :default<undef> );
 my %username         :ATTR( :name<username>,         :default<''> );
 my %password         :ATTR( :name<password>,         :default<''> );
-my %search_path      :ATTR( :name<search_path>,      :default<''> );
 my %cache            :ATTR(                          :default<{}> );
 my %cache_array      :ATTR(                          :default<{}> );
 #my %protocol_slots   :ATTR(                          :default<[]> );
@@ -310,6 +309,7 @@ my %protocol_slots   :ATTR( :get<protocol_slots>,    :default<[]> );
 my %experiment       :ATTR(                          :default<undef> );
 my %prepared_queries :ATTR(                          :default<{}> );
 my %no_relationships :ATTR( :name<no_relationships>, :default<0> );
+my %schema           :ATTR( :get<schema>,            :default<'public'> );
 
 sub START {
   my ($self, $ident, $args) = @_;
@@ -1300,6 +1300,19 @@ sub flatten_attribute : PRIVATE {
   return @columns;
 }
 
+sub set_schema {
+    my ($self, $schema) = @_;
+    $schema ||= "public";
+
+    $schema =~ s/;/_/g;
+
+    $schema{ident $self} = $schema;
+    $dbh{ident $self}->do("SET search_path = $schema");
+
+    my ($experiment_id) = $dbh{ident $self}->selectrow_array("SELECT experiment_id FROM experiment");
+    return $experiment_id;
+}
+
 sub get_dbh : PRIVATE {
   my ($self, $suppress_warnings) = @_;
   
@@ -1318,9 +1331,8 @@ sub get_dbh : PRIVATE {
     }
   }
 
-  if (defined($self->get_search_path())) {
-      my $search_path_cmd = "SET search_path TO " . $self->get_search_path . ",public";
-      $dbh{ident $self}->do("$search_path_cmd");
+  if (defined($schema{ident $self})) {
+      $dbh{ident $self}->do("SET search_path TO $schema{ident $self}");
   }
   return $dbh{ident $self};
 }
