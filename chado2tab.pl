@@ -13,7 +13,7 @@ use ModENCODE::Chado::CV;
 use ModENCODE::Chado::CVTerm;
 use ModENCODE::Chado::Attribute;
 
-my $dbh; # = DBI->connect("dbi:Pg:dbname=mepipe;host=localhost", "db_public", "limecat") or die "Couldn't connect to DB";
+my $dbh; # = DBI->connect("dbi:Pg:dbname=mepipe;host=localhost", "db_public", "pw") or die "Couldn't connect to DB";
 
 my $experiment_id = $ARGV[0];
 
@@ -21,7 +21,7 @@ my $reader = new ModENCODE::Parser::Chado({
     'dbname' => 'mepipe' ,
     'host' => 'localhost',
     'username' => 'db_public',
-    'password' => 'limecat',
+    'password' => 'pw',
   });
 
 if (!$experiment_id) {
